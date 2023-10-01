@@ -1,0 +1,65 @@
+import tkinter as tk
+from tkinter import Text, Button, Label
+import speech_recognition as sr
+from textblob import TextBlob
+
+# Initialize the Tkinter application
+root = tk.Tk()
+root.title("Sentiment Analysis")
+root.geometry("500x500")
+
+# Create a label for the title
+mainTitle = Label(root, text="Sentiment Analysis", font=("Roboto", 25))
+mainTitle.pack()
+
+# Create labels and text box
+subTitle1 = Label(root, text="Speech to Text:", font=("Arial", 18), pady=10)
+subTitle1.pack()
+
+text_box = Text(root, height=6, width=30, padx=5, pady=5)
+text_box.pack()
+
+# Initialize the recognizer
+recognizer = sr.Recognizer()
+
+# Define the function to perform speech-to-text
+def speechToText():
+    with sr.Microphone() as source:
+        print("Listening...")
+        try:
+            audio = recognizer.listen(source)
+            recognized_text = recognizer.recognize_google(audio)
+            text_box.delete("1.0", "end")
+            text_box.insert("1.0", recognized_text)
+        except sr.UnknownValueError:
+            print("Google Speech Recognition could not understand audio")
+        except sr.RequestError as e:
+            print(f"Could not request results from Google Speech Recognition; {e}")
+
+# Create the "START" button
+btn_start = Button(root, text="START", height=1, width=30, bg="#BDBDBD", command=speechToText)
+btn_start.pack()
+
+# Create a label for sentiment analysis result
+sentiment_label = Label(root, text="Sentiment Analysis: No Sentiment", font=("Roboto, 15"), pady=20)
+sentiment_label.pack()
+
+# Define the function to perform sentiment analysis
+def getSentiment():
+    text = text_box.get("1.0", "end")
+    analysis = TextBlob(text)
+    sentiment = analysis.sentiment.polarity
+    if sentiment > 0:
+        result = "Positive"
+    elif sentiment < 0:
+        result = "Negative"
+    else:
+        result = "Neutral"
+    sentiment_label.config(text=f"Sentiment Analysis: {result}")
+
+# Create the "GET SENTIMENT" button
+btn_sentiment = Button(root, text="GET SENTIMENT", height=1, width=30, bg="#BDBDBD", command=getSentiment)
+btn_sentiment.pack()
+
+# Start the Tkinter main loop
+root.mainloop()
